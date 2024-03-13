@@ -17,5 +17,9 @@
       "formatter": "prettier"
     }
   },
-  "formatter": "auto"
+  "formatter": "auto",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  }
 }

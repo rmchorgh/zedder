@@ -1,4 +1,3 @@
-use collab_ui::collab_panel;
 use gpui::{Menu, MenuItem, OsAction};
 use terminal_view::terminal_panel;
 
@@ -127,7 +126,6 @@ pub fn app_menus() -> Vec<Menu<'static>> {
                 }),
                 MenuItem::separator(),
                 MenuItem::action("Project Panel", project_panel::ToggleFocus),
-                MenuItem::action("Collab Panel", collab_panel::ToggleFocus),
                 MenuItem::action("Terminal Panel", terminal_panel::ToggleFocus),
                 MenuItem::separator(),
                 MenuItem::action("Diagnostics", diagnostics::Deploy),
@@ -166,6 +164,7 @@ pub fn app_menus() -> Vec<Menu<'static>> {
         Menu {
             name: "Help",
             items: vec![
+                // MARK  i should get rid of telemetry
                 MenuItem::action("View Telemetry", crate::OpenTelemetryLog),
                 MenuItem::action("View Dependency Licenses", crate::OpenLicenses),
                 MenuItem::action("Show Welcome", workspace::Welcome),
@@ -175,12 +174,6 @@ pub fn app_menus() -> Vec<Menu<'static>> {
                     "Documentation",
                     crate::OpenBrowser {
                         url: "https://zed.dev/docs".into(),
-                    },
-                ),
-                MenuItem::action(
-                    "Zed Twitter",
-                    crate::OpenBrowser {
-                        url: "https://twitter.com/zeddotdev".into(),
                     },
                 ),
             ],

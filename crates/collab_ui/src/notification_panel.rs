@@ -1,4 +1,4 @@
-use crate::{chat_panel::ChatPanel, NotificationPanelSettings};
+use crate::NotificationPanelSettings;
 use anyhow::Result;
 use channel::ChannelStore;
 use client::{ChannelId, Client, Notification, User, UserStore};
@@ -439,6 +439,7 @@ impl NotificationPanel {
         }
     }
 
+    // MARK  for deletion
     fn did_click_notification(&mut self, notification: &Notification, cx: &mut ViewContext<Self>) {
         if let Notification::ChannelMessageMention {
             message_id,
@@ -448,39 +449,14 @@ impl NotificationPanel {
         {
             if let Some(workspace) = self.workspace.upgrade() {
                 cx.window_context().defer(move |cx| {
-                    workspace.update(cx, |workspace, cx| {
-                        if let Some(panel) = workspace.focus_panel::<ChatPanel>(cx) {
-                            panel.update(cx, |panel, cx| {
-                                panel
-                                    .select_channel(ChannelId(channel_id), Some(message_id), cx)
-                                    .detach_and_log_err(cx);
-                            });
-                        }
-                    });
+                    workspace.update(cx, |workspace, cx| {});
                 });
             }
         }
     }
 
+    // MARK  for deletion
     fn is_showing_notification(&self, notification: &Notification, cx: &ViewContext<Self>) -> bool {
-        if !self.active {
-            return false;
-        }
-
-        if let Notification::ChannelMessageMention { channel_id, .. } = &notification {
-            if let Some(workspace) = self.workspace.upgrade() {
-                return if let Some(panel) = workspace.read(cx).panel::<ChatPanel>(cx) {
-                    let panel = panel.read(cx);
-                    panel.is_scrolled_to_bottom()
-                        && panel
-                            .active_chat()
-                            .map_or(false, |chat| chat.read(cx).channel_id.0 == *channel_id)
-                } else {
-                    false
-                };
-            }
-        }
-
         false
     }
 

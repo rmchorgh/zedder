@@ -1,6 +1,4 @@
 pub mod channel_view;
-pub mod chat_panel;
-pub mod collab_panel;
 mod collab_titlebar_item;
 mod face_pile;
 pub mod notification_panel;
@@ -10,16 +8,13 @@ mod panel_settings;
 use std::{rc::Rc, sync::Arc};
 
 use call::{report_call_event_for_room, ActiveCall};
-pub use collab_panel::CollabPanel;
 pub use collab_titlebar_item::CollabTitlebarItem;
 use gpui::{
     actions, point, AppContext, GlobalPixels, Pixels, PlatformDisplay, Size, Task, WindowBounds,
     WindowContext, WindowKind, WindowOptions,
 };
 use panel_settings::MessageEditorSettings;
-pub use panel_settings::{
-    ChatPanelSettings, CollaborationPanelSettings, NotificationPanelSettings,
-};
+pub use panel_settings::NotificationPanelSettings;
 use settings::Settings;
 use workspace::{notifications::DetachAndPromptErr, AppState};
 
@@ -29,18 +24,14 @@ actions!(
 );
 
 pub fn init(app_state: &Arc<AppState>, cx: &mut AppContext) {
-    CollaborationPanelSettings::register(cx);
-    ChatPanelSettings::register(cx);
-    NotificationPanelSettings::register(cx);
-    MessageEditorSettings::register(cx);
+    NotificationPanelSettings::register(cx); // MARK  for deletion
+    MessageEditorSettings::register(cx); // MARK  for deletion
 
     vcs_menu::init(cx);
     collab_titlebar_item::init(cx);
-    collab_panel::init(cx);
     channel_view::init(cx);
-    chat_panel::init(cx);
-    notification_panel::init(cx);
-    notifications::init(&app_state, cx);
+    notification_panel::init(cx); // MARK  for deletion
+    notifications::init(&app_state, cx); // MARK  for deletion
 }
 
 pub fn toggle_screen_sharing(_: &ToggleScreenSharing, cx: &mut WindowContext) {
