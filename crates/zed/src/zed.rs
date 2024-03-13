@@ -2976,7 +2976,7 @@ mod tests {
             language::init(cx);
             editor::init(cx);
             project_panel::init_settings(cx);
-            collab_ui::init(&app_state, cx);
+            collab_ui::init(cx);
             project_panel::init((), cx);
             terminal_view::init(cx);
             assistant::init(cx);
