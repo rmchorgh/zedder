@@ -1244,11 +1244,11 @@ async fn test_history_items_vs_very_good_external_match(cx: &mut gpui::TestAppCo
         .insert_tree(
             "/src",
             json!({
-                "collab_ui": {
+                "header_ui": {
                     "first.rs": "// First Rust file",
                     "second.rs": "// Second Rust file",
                     "third.rs": "// Third Rust file",
-                    "collab_ui.rs": "// Fourth Rust file",
+                    "header_ui.rs": "// Fourth Rust file",
                 }
             }),
         )
@@ -1263,7 +1263,7 @@ async fn test_history_items_vs_very_good_external_match(cx: &mut gpui::TestAppCo
     open_close_queried_buffer("sec", 1, "second.rs", &workspace, cx).await;
 
     let finder = open_file_picker(&workspace, cx);
-    let query = "collab_ui";
+    let query = "header_ui";
     cx.simulate_input(query);
     finder.update(cx, |finder, _| {
             let delegate = &finder.delegate;
@@ -1281,10 +1281,10 @@ async fn test_history_items_vs_very_good_external_match(cx: &mut gpui::TestAppCo
             assert_eq!(
                 search_entries,
                 vec![
-                    PathBuf::from("collab_ui/collab_ui.rs"),
-                    PathBuf::from("collab_ui/first.rs"),
-                    PathBuf::from("collab_ui/third.rs"),
-                    PathBuf::from("collab_ui/second.rs"),
+                    PathBuf::from("header_ui/header_ui.rs"),
+                    PathBuf::from("header_ui/first.rs"),
+                    PathBuf::from("header_ui/third.rs"),
+                    PathBuf::from("header_ui/second.rs"),
                 ],
                 "Despite all search results having the same directory name, the most matching one should be on top"
             );

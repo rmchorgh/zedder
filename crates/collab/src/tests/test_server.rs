@@ -12,11 +12,11 @@ use client::{
     UserStore,
 };
 use clock::FakeSystemClock;
-use collab_ui::channel_view::ChannelView;
 use collections::{HashMap, HashSet};
 use fs::FakeFs;
 use futures::{channel::oneshot, StreamExt as _};
 use gpui::{BackgroundExecutor, Context, Model, Task, TestAppContext, View, VisualTestContext};
+use header_ui::channel_view::ChannelView;
 use language::LanguageRegistry;
 use node_runtime::FakeNodeRuntime;
 
@@ -279,7 +279,7 @@ impl TestServer {
             call::init(client.clone(), user_store.clone(), cx);
             channel::init(&client, user_store.clone(), cx);
             notifications::init(client.clone(), user_store, cx);
-            collab_ui::init(&app_state, cx);
+            header_ui::init(&app_state, cx);
             file_finder::init(cx);
             menu::init();
             settings::KeymapFile::load_asset("keymaps/default-macos.json", cx).unwrap();

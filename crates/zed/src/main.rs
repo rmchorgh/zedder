@@ -254,7 +254,7 @@ fn main() {
         language_tools::init(cx);
         call::init(app_state.client.clone(), app_state.user_store.clone(), cx);
         notifications::init(app_state.client.clone(), app_state.user_store.clone(), cx);
-        collab_ui::init(cx);
+        header_ui::init(cx);
         feedback::init(cx);
         markdown_preview::init(cx);
         welcome::init(cx);

@@ -1,7 +1,7 @@
 use crate::{rpc::RECONNECT_TIMEOUT, tests::TestServer};
 use channel::{ChannelChat, ChannelMessageId, MessageParams};
-use collab_ui::chat_panel::ChatPanel;
 use gpui::{BackgroundExecutor, Model, TestAppContext};
+use header_ui::chat_panel::ChatPanel;
 use rpc::Notification;
 use workspace::dock::Panel;
 
@@ -320,7 +320,7 @@ async fn test_channel_message_changes(
 
     // Opening the chat should clear the changed flag.
     cx_b.update(|cx| {
-        collab_ui::init(&client_b.app_state, cx);
+        header_ui::init(&client_b.app_state, cx);
     });
     let project_b = client_b.build_empty_local_project(cx_b);
     let (workspace_b, cx_b) = client_b.build_workspace(&project_b, cx_b);

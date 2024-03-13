@@ -1,14 +1,14 @@
 use crate::{rpc::RECONNECT_TIMEOUT, tests::TestServer};
 use call::{ActiveCall, ParticipantLocation};
 use client::ChannelId;
-use collab_ui::{
-    channel_view::ChannelView,
-    notifications::project_shared_notification::ProjectSharedNotification,
-};
 use editor::{Editor, ExcerptRange, MultiBuffer};
 use gpui::{
     point, BackgroundExecutor, Context, Entity, SharedString, TestAppContext, View, VisualContext,
     VisualTestContext,
+};
+use header_ui::{
+    channel_view::ChannelView,
+    notifications::project_shared_notification::ProjectSharedNotification,
 };
 use language::Capability;
 use live_kit_client::MacOSDisplay;
@@ -1468,7 +1468,7 @@ async fn test_following_across_workspaces(cx_a: &mut TestAppContext, cx_b: &mut 
         );
     });
 
-    // TODO: in app code, this would be done by the collab_ui.
+    // TODO: in app code, this would be done by the header_ui.
     active_call_b
         .update(&mut cx_b2, |call, cx| {
             let project = workspace_b_project_a.read(cx).project().clone();
@@ -1520,7 +1520,7 @@ async fn test_following_across_workspaces(cx_a: &mut TestAppContext, cx_b: &mut 
         .await
         .unwrap();
 
-    // TODO: in app code, this would be done by the collab_ui.
+    // TODO: in app code, this would be done by the header_ui.
     active_call_b
         .update(cx_b, |call, cx| {
             let project = workspace_b.read(cx).project().clone();
@@ -1858,9 +1858,9 @@ async fn test_following_to_channel_notes_without_a_shared_project(
     cx_a.update(editor::init);
     cx_b.update(editor::init);
     cx_c.update(editor::init);
-    cx_a.update(collab_ui::channel_view::init);
-    cx_b.update(collab_ui::channel_view::init);
-    cx_c.update(collab_ui::channel_view::init);
+    cx_a.update(header_ui::channel_view::init);
+    cx_b.update(header_ui::channel_view::init);
+    cx_c.update(header_ui::channel_view::init);
 
     let channel_1_id = server
         .make_channel(

@@ -46,7 +46,7 @@ impl ComponentStory {
             Self::Button => cx.new_view(|_| ui::ButtonStory).into(),
             Self::Checkbox => cx.new_view(|_| ui::CheckboxStory).into(),
             Self::CollabNotification => cx
-                .new_view(|_| collab_ui::notifications::CollabNotificationStory)
+                .new_view(|_| header_ui::notifications::CollabNotificationStory)
                 .into(),
             Self::ContextMenu => cx.new_view(|_| ui::ContextMenuStory).into(),
             Self::Cursor => cx.new_view(|_| crate::stories::CursorStory).into(),

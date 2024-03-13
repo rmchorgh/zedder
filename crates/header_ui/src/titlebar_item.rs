@@ -19,19 +19,19 @@ actions!(collab, [ToggleUserMenu, ToggleProjectMenu, SwitchBranch]);
 
 pub fn init(cx: &mut AppContext) {
     cx.observe_new_views(|workspace: &mut Workspace, cx| {
-        let titlebar_item = cx.new_view(|cx| CollabTitlebarItem::new(workspace, cx));
+        let titlebar_item = cx.new_view(|cx| TitlebarItem::new(workspace, cx));
         workspace.set_titlebar_item(titlebar_item.into(), cx)
     })
     .detach();
 }
 
-pub struct CollabTitlebarItem {
+pub struct TitlebarItem {
     project: Model<Project>,
     workspace: WeakView<Workspace>,
     _subscriptions: Vec<Subscription>,
 }
 
-impl Render for CollabTitlebarItem {
+impl Render for TitlebarItem {
     fn render(&mut self, cx: &mut ViewContext<Self>) -> impl IntoElement {
         h_flex()
             .id("titlebar")
@@ -70,7 +70,7 @@ impl Render for CollabTitlebarItem {
     }
 }
 
-impl CollabTitlebarItem {
+impl TitlebarItem {
     pub fn new(workspace: &Workspace, cx: &mut ViewContext<Self>) -> Self {
         let project = workspace.project().clone();
         let mut subscriptions = Vec::new();
