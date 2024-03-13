@@ -1,4 +1,3 @@
-use client::UserStore;
 use gpui::{
     actions, div, px, Action, AppContext, Element, InteractiveElement, IntoElement, Model,
     ParentElement, Render, StatefulInteractiveElement, Styled, Subscription, View, ViewContext,
@@ -8,10 +7,7 @@ use project::{Project, RepositoryEntry};
 use recent_projects::RecentProjects;
 use std::env;
 use theme::ActiveTheme;
-use ui::{
-    h_flex, popover_menu, prelude::*, Avatar, Button, ButtonLike, ButtonStyle, ContextMenu, Icon,
-    IconName, Tooltip,
-};
+use ui::{h_flex, popover_menu, prelude::*, Button, ButtonLike, ButtonStyle, ContextMenu, Tooltip};
 use util::ResultExt;
 use vcs_menu::{build_branch_list, BranchList, OpenRecent as ToggleVcsMenu};
 use workspace::{titlebar_height, Workspace};
@@ -31,7 +27,6 @@ pub fn init(cx: &mut AppContext) {
 
 pub struct CollabTitlebarItem {
     project: Model<Project>,
-    user_store: Model<UserStore>,
     workspace: WeakView<Workspace>,
     _subscriptions: Vec<Subscription>,
 }
@@ -62,19 +57,22 @@ impl Render for CollabTitlebarItem {
             .child(
                 h_flex()
                     .gap_1()
-                    .children(self.render_project_host(cx))
                     .child(self.render_project_name(cx))
                     .children(self.render_project_branch(cx)),
             )
             // right side
-            .child(h_flex().gap_1().pr_1().child(self.render_whats_up(cx)))
+            .child(
+                h_flex()
+                    .gap_1()
+                    .pr_1()
+                    .child(self.render_user_menu_button()),
+            )
     }
 }
 
 impl CollabTitlebarItem {
     pub fn new(workspace: &Workspace, cx: &mut ViewContext<Self>) -> Self {
         let project = workspace.project().clone();
-        let user_store = workspace.app_state().user_store.clone();
         let mut subscriptions = Vec::new();
         subscriptions.push(
             cx.observe(&workspace.weak_handle().upgrade().unwrap(), |_, _, cx| {
@@ -82,52 +80,12 @@ impl CollabTitlebarItem {
             }),
         );
         subscriptions.push(cx.observe(&project, |_, _, cx| cx.notify()));
-        subscriptions.push(cx.observe(&user_store, |_, _, cx| cx.notify()));
 
         Self {
             workspace: workspace.weak_handle(),
             project,
-            user_store,
             _subscriptions: subscriptions,
         }
-    }
-
-    // resolve if you are in a room -> render_project_owner
-    // render_project_owner -> resolve if you are in a room -> Option<foo>
-
-    pub fn render_project_host(&self, cx: &mut ViewContext<Self>) -> Option<impl IntoElement> {
-        let host = self.project.read(cx).host()?;
-        let host_user = self.user_store.read(cx).get_cached_user(host.user_id)?;
-        let participant_index = self
-            .user_store
-            .read(cx)
-            .participant_indices()
-            .get(&host_user.id)?;
-        Some(
-            Button::new("project_owner_trigger", host_user.github_login.clone())
-                .color(Color::Player(participant_index.0))
-                .style(ButtonStyle::Subtle)
-                .label_size(LabelSize::Small)
-                .tooltip(move |cx| {
-                    Tooltip::text(
-                        format!(
-                            "{} is sharing this project. Click to follow.",
-                            host_user.github_login.clone()
-                        ),
-                        cx,
-                    )
-                })
-                .on_click({
-                    let host_peer_id = host.peer_id;
-                    cx.listener(move |this, _, cx| {
-                        this.workspace
-                            .update(cx, |workspace, cx| {
-                                workspace.follow(host_peer_id, cx);
-                            })
-                            .log_err();
-                    })
-                }),
-        )
     }
 
     pub fn render_project_name(&self, cx: &mut ViewContext<Self>) -> impl Element {
@@ -214,58 +172,26 @@ impl CollabTitlebarItem {
         view
     }
 
-    pub fn render_whats_up(&mut self, _cx: &mut ViewContext<Self>) -> Div {
+    pub fn render_user_menu_button(&mut self) -> impl Element {
         let user = env::var("USER").unwrap_or("".to_string());
-        div()
-            .mx_2()
-            .child(Label::new(format!("what's up, {}", user)).size(LabelSize::Small))
-    }
-
-    pub fn render_user_menu_button(&mut self, cx: &mut ViewContext<Self>) -> impl Element {
-        if let Some(user) = self.user_store.read(cx).current_user() {
-            popover_menu("user-menu")
-                .menu(|cx| {
-                    ContextMenu::build(cx, |menu, _| {
-                        menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
-                            .action("Extensions", extensions_ui::Extensions.boxed_clone())
-                            .action("Themes...", theme_selector::Toggle.boxed_clone())
-                            .separator()
-                            .action("Sign Out", client::SignOut.boxed_clone())
-                    })
-                    .into()
+        popover_menu("user-menu")
+            .menu(|cx| {
+                ContextMenu::build(cx, |menu, _| {
+                    menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
+                        .action("Extensions", extensions_ui::Extensions.boxed_clone())
+                        .action("Themes", theme_selector::Toggle.boxed_clone())
                 })
-                .trigger(
-                    ButtonLike::new("user-menu")
-                        .child(
-                            h_flex()
-                                .gap_0p5()
-                                .child(Avatar::new(user.avatar_uri.clone()))
-                                .child(Icon::new(IconName::ChevronDown).color(Color::Muted)),
-                        )
-                        .style(ButtonStyle::Subtle)
-                        .tooltip(move |cx| Tooltip::text("Toggle User Menu", cx)),
-                )
-                .anchor(gpui::AnchorCorner::TopRight)
-        } else {
-            popover_menu("user-menu")
-                .menu(|cx| {
-                    ContextMenu::build(cx, |menu, _| {
-                        menu.action("Settings", zed_actions::OpenSettings.boxed_clone())
-                            .action("Extensions", extensions_ui::Extensions.boxed_clone())
-                            .action("Themes...", theme_selector::Toggle.boxed_clone())
-                    })
-                    .into()
-                })
-                .trigger(
-                    ButtonLike::new("user-menu")
-                        .child(
-                            h_flex()
-                                .gap_0p5()
-                                .child(Icon::new(IconName::ChevronDown).color(Color::Muted)),
-                        )
-                        .style(ButtonStyle::Subtle)
-                        .tooltip(move |cx| Tooltip::text("Toggle User Menu", cx)),
-                )
-        }
+                .into()
+            })
+            .trigger(
+                ButtonLike::new("user-menu")
+                    .child(
+                        div().mx_2().child(
+                            Label::new(format!("what's up, {}", user)).size(LabelSize::Small),
+                        ),
+                    )
+                    .style(ButtonStyle::Subtle)
+                    .tooltip(move |cx| Tooltip::text("Config", cx)),
+            )
     }
 }
