@@ -246,6 +246,9 @@ impl Render for BufferSearchBar {
                     .flex_none()
                     .child(
                         h_flex()
+                            .border_1()
+                            .border_color(cx.theme().colors().border)
+                            .rounded_lg()
                             .child(
                                 ToggleButton::new("search-mode-text", SearchMode::Text.label())
                                     .style(ButtonStyle::Filled)

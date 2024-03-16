@@ -874,19 +874,31 @@ impl PickerDelegate for FileFinderDelegate {
 
         Some(
             ListItem::new(ix)
+                .inset(false)
                 .spacing(ListItemSpacing::Sparse)
-                .inset(true)
                 .selected(selected)
+                .indent_level(0)
                 .child(
                     h_flex()
-                        .gap_2()
+                        .w_full()
+                        .h_10()
+                        .justify_between()
                         .py_px()
                         .child(HighlightedLabel::new(file_name, file_name_positions))
-                        .child(
-                            HighlightedLabel::new(full_path, full_path_positions)
-                                .size(LabelSize::Small)
-                                .color(Color::Muted),
-                        ),
+                        .when(!full_path.is_empty(), |this| {
+                            this.child(
+                                div()
+                                    .py_1()
+                                    .px_3()
+                                    .bg(Color::AccentDark.color(cx))
+                                    .rounded_md()
+                                    .child(
+                                        HighlightedLabel::new(full_path, full_path_positions)
+                                            .size(LabelSize::XSmall)
+                                            .color(Color::Muted),
+                                    ),
+                            )
+                        }),
                 ),
         )
     }

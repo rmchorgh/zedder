@@ -153,10 +153,11 @@ impl RenderOnce for ListItem {
             .w_full()
             .relative()
             // When an item is inset draw the indent spacing outside of the item
-            .when(self.inset, |this| {
-                this.ml(self.indent_level as f32 * self.indent_step_size)
-                    .px_2()
-            })
+            // .when(self.inset, |this| {
+            //     this.ml(self.indent_level as f32 * self.indent_step_size)
+            //         .px_2()
+            // })
+            .border_y_1()
             .when(!self.inset, |this| {
                 this
                     // TODO: Add focus state
@@ -164,10 +165,11 @@ impl RenderOnce for ListItem {
                     //     this.border()
                     //         .border_color(cx.theme().colors().border_focused)
                     // })
-                    .hover(|style| style.bg(cx.theme().colors().ghost_element_hover))
+                    .hover(|style| style.border_color(cx.theme().colors().ghost_element_hover))
                     .active(|style| style.bg(cx.theme().colors().ghost_element_active))
                     .when(self.selected, |this| {
-                        this.bg(cx.theme().colors().ghost_element_selected)
+                        this.border_color(cx.theme().colors().ghost_element_selected)
+                            .border_l_width(self.indent_step_size)
                     })
             })
             .child(
@@ -182,6 +184,7 @@ impl RenderOnce for ListItem {
                         ListItemSpacing::Sparse => this.py_1(),
                     })
                     .group("list_item")
+                    .border_y_1()
                     .when(self.inset && !self.disabled, |this| {
                         this
                             // TODO: Add focus state
@@ -192,7 +195,8 @@ impl RenderOnce for ListItem {
                             .hover(|style| style.bg(cx.theme().colors().ghost_element_hover))
                             .active(|style| style.bg(cx.theme().colors().ghost_element_active))
                             .when(self.selected, |this| {
-                                this.bg(cx.theme().colors().ghost_element_selected)
+                                this.border_color(cx.theme().colors().ghost_element_selected)
+                                    .border_l_2()
                             })
                     })
                     .when_some(self.on_click, |this, on_click| {
@@ -205,12 +209,15 @@ impl RenderOnce for ListItem {
                     })
                     .when_some(self.tooltip, |this, tooltip| this.tooltip(tooltip))
                     .map(|this| {
-                        if self.inset {
-                            this.rounded_md()
-                        } else {
-                            // When an item is not inset draw the indent spacing inside of the item
-                            this.ml(self.indent_level as f32 * self.indent_step_size)
-                        }
+                        let sel_len = self.indent_level as f32
+                            + (if self.selected || self.inset {
+                                0.25
+                            } else {
+                                1.25
+                            });
+                        // When an item is not inset draw the indent spacing inside of the item
+
+                        this.ml(sel_len * self.indent_step_size)
                     })
                     .children(self.toggle.map(|is_open| {
                         div()

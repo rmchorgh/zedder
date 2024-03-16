@@ -7,6 +7,7 @@ pub enum Color {
     #[default]
     Default,
     Accent,
+    AccentDark,
     Created,
     Deleted,
     Disabled,
@@ -37,6 +38,7 @@ impl Color {
             Color::Info => cx.theme().status().info,
             Color::Placeholder => cx.theme().colors().text_placeholder,
             Color::Accent => cx.theme().colors().text_accent,
+            Color::AccentDark => cx.theme().colors().background,
             Color::Player(i) => cx.theme().styles.player.color_for_participant(*i).cursor,
             Color::Error => cx.theme().status().error,
             Color::Selected => cx.theme().colors().text_accent,

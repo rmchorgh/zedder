@@ -1732,6 +1732,9 @@ impl Render for ProjectSearchBar {
                 .gap_2()
                 .child(
                     h_flex()
+                        .border_1()
+                        .border_color(cx.theme().colors().border)
+                        .rounded_lg()
                         .child(
                             ToggleButton::new("project-search-text-button", "Text")
                                 .style(ButtonStyle::Filled)
