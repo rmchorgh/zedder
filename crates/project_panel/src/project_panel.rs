@@ -23,7 +23,7 @@ use project::{
 };
 use project_panel_settings::{ProjectPanelDockPosition, ProjectPanelSettings};
 use serde::{Deserialize, Serialize};
-use std::{cmp::Ordering, ffi::OsStr, ops::Range, path::Path, sync::Arc};
+use std::{cmp::Ordering, ffi::OsStr, ops::Range, path::Path, process::Command, sync::Arc};
 use theme::ThemeSettings;
 use ui::{prelude::*, v_flex, ContextMenu, Icon, KeyBinding, Label, ListItem};
 use unicase::UniCase;
@@ -120,6 +120,7 @@ actions!(
         Open,
         ToggleFocus,
         NewSearchInDirectory,
+        AddToCommit
     ]
 );
 
@@ -392,7 +393,10 @@ impl ProjectPanel {
             let worktree_id = worktree.id();
             let is_local = project.is_local();
             let is_read_only = project.is_read_only();
-
+            let is_changed = match entry.git_status {
+                Some(GitFileStatus::Added | GitFileStatus::Modified) => true,
+                _ => false,
+            };
             let context_menu = ContextMenu::build(cx, |menu, cx| {
                 menu.context(self.focus_handle.clone()).when_else(
                     is_read_only,
@@ -442,6 +446,10 @@ impl ProjectPanel {
                         .separator()
                         .action("Rename", Box::new(Rename))
                         .when(!is_root, |menu| menu.action("Delete", Box::new(Delete)))
+                        .separator()
+                        .when(is_changed, |menu| {
+                            menu.action("Add to Commit", Box::new(AddToCommit))
+                        })
                     },
                 )
             });
@@ -948,6 +956,18 @@ impl ProjectPanel {
 
             Some(())
         });
+    }
+
+    fn add_to_commit(&mut self, _: &AddToCommit, cx: &mut ViewContext<Self>) {
+        if let Some((_, entry)) = self.selected_entry(cx) {
+            let path = entry.path.to_string_lossy().to_string();
+            let git_proc = Command::new("git")
+                .arg("add")
+                .arg(path.clone())
+                .output()
+                .expect("Failed to execute git process.");
+            println!("{} {}", path, String::from_utf8(git_proc.stdout).unwrap());
+        }
     }
 
     fn copy_path(&mut self, _: &CopyPath, cx: &mut ViewContext<Self>) {
@@ -1536,6 +1556,7 @@ impl Render for ProjectPanel {
                 .when(project.is_local(), |el| {
                     el.on_action(cx.listener(Self::reveal_in_finder))
                         .on_action(cx.listener(Self::open_in_terminal))
+                        .on_action(cx.listener(Self::add_to_commit))
                 })
                 .on_mouse_down(
                     MouseButton::Right,
