@@ -961,12 +961,13 @@ impl ProjectPanel {
     fn add_to_commit(&mut self, _: &AddToCommit, cx: &mut ViewContext<Self>) {
         if let Some((_, entry)) = self.selected_entry(cx) {
             let path = entry.path.to_string_lossy().to_string();
-            let git_proc = Command::new("git")
+            println!("Adding {} to commit", path);
+
+            Command::new("git")
                 .arg("add")
                 .arg(path.clone())
                 .output()
                 .expect("Failed to execute git process.");
-            println!("{} {}", path, String::from_utf8(git_proc.stdout).unwrap());
         }
     }
 
