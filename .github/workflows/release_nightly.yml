@@ -1,8 +1,9 @@
 name: Release Nightly
 
 on:
-    label:
-        types: [force-build]
+    on:
+        pull_request:
+            types: [closed]
     push:
         tags:
             - "nightly"
