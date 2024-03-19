@@ -397,6 +397,7 @@ impl ProjectPanel {
                 Some(GitFileStatus::Added | GitFileStatus::Modified) => true,
                 _ => false,
             };
+
             let context_menu = ContextMenu::build(cx, |menu, cx| {
                 menu.context(self.focus_handle.clone()).when_else(
                     is_read_only,
@@ -446,9 +447,9 @@ impl ProjectPanel {
                         .separator()
                         .action("Rename", Box::new(Rename))
                         .when(!is_root, |menu| menu.action("Delete", Box::new(Delete)))
-                        .separator()
                         .when(is_changed, |menu| {
-                            menu.action("Add to Commit", Box::new(AddToCommit))
+                            menu.separator()
+                                .action("Add to Commit", Box::new(AddToCommit))
                         })
                     },
                 )
@@ -959,8 +960,12 @@ impl ProjectPanel {
     }
 
     fn add_to_commit(&mut self, _: &AddToCommit, cx: &mut ViewContext<Self>) {
-        if let Some((_, entry)) = self.selected_entry(cx) {
-            let path = entry.path.to_string_lossy().to_string();
+        if let Some((worktree, entry)) = self.selected_entry(cx) {
+            let path = worktree
+                .abs_path()
+                .join(&entry.path)
+                .to_string_lossy()
+                .to_string();
             println!("Adding {} to commit", path);
 
             Command::new("git")
